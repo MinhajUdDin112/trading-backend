@@ -1,35 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 @Injectable()
 export class MailService {
-  private transporter: nodemailer.Transporter;
+  private resend: Resend;
 
   constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    this.resend = new Resend(process.env.RESEND_API_KEY);
   }
 
   async sendOtp(email: string, otp: string) {
-    console.log('SMTP CONFIG:', {
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    });
-    await this.transporter.sendMail({
-      from: `OTP Service <${process.env.SMTP_FROM}>`,
-      to: email,
-      subject: 'Your OTP Code',
-      text: `Your OTP code is: ${otp}`,
-      html: `<p>Your OTP code is <b>${otp}</b></p>`,
-    });
+    try {
+      const response = await this.resend.emails.send({
+        from: process.env.RESEND_FROM || 'no-reply@yourdomain.com',
+        to: email,
+        subject: 'Your OTP Code',
+        html: `<p>Your OTP code is <b>${otp}</b></p>`,
+      });
+
+      console.log('Email sent:', response);
+      return response;
+    } catch (error) {
+      console.error('Resend Error:', error);
+      throw error;
+    }
   }
 }
