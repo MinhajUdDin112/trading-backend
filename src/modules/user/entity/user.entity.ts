@@ -40,4 +40,13 @@ export class User {
 
   @Column({ default: false })
   onboardingCompleted: boolean;
+
+  @Column({ nullable: true })
+  aadhaarFile: string;
+
+  @Column({ nullable: true })
+  panFile: string;
+
+  @Column({ nullable: true })
+  selfieFile: string;
 }

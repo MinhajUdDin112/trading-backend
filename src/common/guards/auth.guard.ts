@@ -15,7 +15,6 @@ export class AuthGuard extends BaseAuthGuard('jwt') {
     if (err || !user) {
       throw new UnauthorizedException('Unauthorized');
     }
-    console.log('Authenticated user:', user);
     return user;
   }
 }

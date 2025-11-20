@@ -7,6 +7,7 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
+import { join } from 'path';
 
 async function bootstrap() {
   dotenv.config();
@@ -17,6 +18,7 @@ async function bootstrap() {
 
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
+  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
   app.useGlobalPipes(
     new ValidationPipe({

@@ -2,7 +2,7 @@ import { DocumentBuilder } from '@nestjs/swagger';
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes';
 
 export const swaggerConfig = new DocumentBuilder()
-  .setTitle('Fitness apis')
+  .setTitle('Trading apis')
   .setDescription('API documentation for app')
   .setVersion('1.0')
   .addBearerAuth(
@@ -35,7 +35,7 @@ const theme = new SwaggerTheme();
 
 export const swaggerCustomOptions = {
   customCss: theme.getBuffer(SwaggerThemeNameEnum.CLASSIC),
-  customSiteTitle: 'Fitness APIs',
+  customSiteTitle: 'Trading APIs',
   swaggerOptions: {
     persistAuthorization: true,
     filter: true,

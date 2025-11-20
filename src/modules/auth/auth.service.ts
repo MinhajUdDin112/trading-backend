@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { MailService } from 'src/common/utils/mail.service';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { SendOtpDto } from './dto/sendotp.dto';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
@@ -65,6 +66,13 @@ export class AuthService {
 
     const updatedUsr = await this.userRepo.save(user);
 
-    return { message: 'OTP verified successfully', user: updatedUsr };
+    // create verification token
+    const token = jwt.sign(
+      { email: user.email, id: user.id },
+      process.env.JWT_SECRET || 'secretKey',
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7h' } as jwt.SignOptions,
+    );
+
+    return { message: 'OTP verified successfully', user: updatedUsr, token };
   }
 }
