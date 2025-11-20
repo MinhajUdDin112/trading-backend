@@ -14,6 +14,11 @@ export class MailService {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      tls: {
+        ciphers: 'TLSv1.2',
+        rejectUnauthorized: false, // required for Render sometimes
+      },
+      connectionTimeout: 15000, // optional, 15s
     });
   }
 
