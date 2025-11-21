@@ -14,6 +14,9 @@ export class User {
   @Column()
   email: string;
 
+  @Column({ nullable: true })
+  password: string;
+
   @Column({ type: 'varchar', length: 6, nullable: true })
   otp: string | null;
 
@@ -49,4 +52,10 @@ export class User {
 
   @Column({ nullable: true })
   selfieFile: string;
+
+  @Column({ type: 'varchar', length: 20, default: 'pending' })
+  kycStatus: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  kycData: any;
 }

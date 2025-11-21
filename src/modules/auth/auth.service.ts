@@ -9,7 +9,9 @@ import { Repository } from 'typeorm';
 import { MailService } from 'src/common/utils/mail.service';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { SendOtpDto } from './dto/sendotp.dto';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -17,10 +19,74 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly mailerService: MailService,
+    private readonly jwtService: JwtService,
   ) {}
 
   generateOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  async register(email: string, password: string) {
+    const exists = await this.userRepo.findOne({ where: { email } });
+
+    if (exists) {
+      throw new BadRequestException('Email already registered');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = this.userRepo.create({
+      email,
+      password: hashedPassword,
+      isVerified: true, // since email/password register does not use otp
+    });
+
+    await this.userRepo.save(user);
+
+    const token = this.jwtService.sign({
+      id: user.id,
+      email: user.email,
+    });
+
+    return {
+      message: 'Registration successful',
+      user,
+      token,
+    };
+  }
+
+  // ================================
+  // LOGIN USER
+  // ================================
+  async login(email: string, password: string) {
+    const user = await this.userRepo.findOne({ where: { email } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.password) {
+      throw new BadRequestException(
+        'This user is registered via OTP login, not password login',
+      );
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      throw new BadRequestException('Incorrect password');
+    }
+
+    // Generate JWT token
+    const token = this.jwtService.sign({
+      id: user.id,
+      email: user.email,
+    });
+
+    return {
+      message: 'Login successful',
+      user,
+      token,
+    };
   }
 
   async sendOtp(dto: SendOtpDto) {
